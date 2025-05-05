@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "loadbalancing": "StartDebugging",
+        "loadbalancing.api": "StartDebugging",
+        "loadbalancing.yarp": "StartDebugging",
+        "yarp.auth.api": "StartDebugging",
+        "yarp.auth.gateway": "StartDebugging",
+        "keycloak.auth.proxy": "StartDebugging"
+      }
+    }
+  }
+}
