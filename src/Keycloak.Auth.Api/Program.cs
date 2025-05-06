@@ -1,42 +1,29 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Keycloak.Auth.Api.Extensions;
+using Keycloak.Auth.Api.Handlers;
+using Keycloak.Auth.Api.Policies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+
+builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGenWithAuth(builder.Configuration);
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminFromPublicClientPolicy", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireClaim("azp", "public-client"); // Проверяем клиента (azp = authorized party)
-        policy.RequireAssertion(context =>
-        {
-            // Проверяем, есть ли роль admin в resource_access.public-client.roles
-            if (context.User.HasClaim(c => c.Type == "resource_access"))
-            {
-                Claim? resourceAccessClaim = context.User.FindFirst("resource_access");
-                JsonElement resourceAccess = JsonSerializer.Deserialize<JsonElement>(resourceAccessClaim!.Value);
+builder.Services.AddSingleton<IAuthorizationHandler, AdminFromPublicClientPolicyHandler>();
 
-                if (resourceAccess.TryGetProperty("public-client", out JsonElement publicClient))
-                {
-                    return publicClient.TryGetProperty("roles", out JsonElement roles) &&
-                           roles.EnumerateArray().Any(r => r.GetString() == "admin");
-                }
-            }
-
-            return false;
-        });
-    });
-});
-
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(AdminFromPublicClientPolicy.PolicyName, 
+        policy => policy.AddRequirements(new AdminFromPublicClientPolicy()).Build());
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
@@ -69,6 +56,7 @@ builder.Services
     });
 
 WebApplication app = builder.Build();
+// Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
 {
@@ -76,16 +64,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("users/me", (ClaimsPrincipal claimsPrincipal) =>
-{
-    return claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value);
-}).RequireAuthorization();
-
-app.MapGet("/helloAdmin", () => "Hello admin!")
-    .RequireAuthorization("AdminFromPublicClientPolicy");
-
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 await app.RunAsync().ConfigureAwait(false);

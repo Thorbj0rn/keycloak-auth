@@ -11,32 +11,13 @@ services:
     - "dotnet"
     - "/app/bin/Debug/net8.0/Keycloak.Auth.Api.dll"
     environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
     image: "keycloakauthapi:dev"
     ports: []
     volumes:
     - "C:\\Users\\v.shtackiy\\Downloads\\source-code-keycloak-dotnet\\after\\keycloak-auth\\\
       src\\Keycloak.Auth.Api:/app:rw"
-    - "C:\\Users\\v.shtackiy\\Downloads\\source-code-keycloak-dotnet\\after\\keycloak-auth:/src:rw"
-    - "C:\\Users\\v.shtackiy\\.nuget\\packages:/home/app/.nuget/packages"
-    working_dir: "/app"
-  keycloak.auth.proxy:
-    build:
-      context: "C:\\Users\\v.shtackiy\\Downloads\\source-code-keycloak-dotnet\\after\\\
-        keycloak-auth"
-      dockerfile: "src/Keycloak.Auth.Proxy/Dockerfile"
-      target: "base"
-    command: []
-    entrypoint:
-    - "dotnet"
-    - "/app/bin/Debug/net8.0/Keycloak.Auth.Proxy.dll"
-    environment:
-      DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "keycloakauthproxy:dev"
-    ports: []
-    volumes:
-    - "C:\\Users\\v.shtackiy\\Downloads\\source-code-keycloak-dotnet\\after\\keycloak-auth\\\
-      src\\Keycloak.Auth.Proxy:/app:rw"
     - "C:\\Users\\v.shtackiy\\Downloads\\source-code-keycloak-dotnet\\after\\keycloak-auth:/src:rw"
     - "C:\\Users\\v.shtackiy\\.nuget\\packages:/home/app/.nuget/packages"
     working_dir: "/app"

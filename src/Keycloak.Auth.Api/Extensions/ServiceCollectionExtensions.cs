@@ -17,6 +17,7 @@ internal static class ServiceCollectionExtensions
                 Type = SecuritySchemeType.OAuth2,
                 Flows = new OpenApiOAuthFlows
                 {
+                    
                     Implicit = new OpenApiOAuthFlow
                     {
                         AuthorizationUrl = new Uri(configuration["Keycloak:AuthorizationUrl"]!),
