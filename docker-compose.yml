@@ -9,7 +9,14 @@ services:
       - 5000:8080
       - 5001:8081
     environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=your_password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ${USERPROFILE}\.aspnet\https:/https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       
   
   keycloak:
@@ -20,7 +27,7 @@ services:
       - TZ=Europe/Chisinau
       - KC_HEALTH_ENABLED=true
       - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin      
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./.containers/identity:/opt/keycloak/data
